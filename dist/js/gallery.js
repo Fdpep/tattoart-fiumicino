@@ -7,9 +7,9 @@ export function relativePosition(index, current, length) {
 }
 export function cardTransform(distance, viewport) {
  const mobile = viewport < 768;
- const spacing = mobile ? 155 : viewport >= 1600 ? 250 : 220;
+ const spacing = mobile ? 186 : viewport >= 1600 ? 250 : 220;
  const a = Math.abs(distance);
- return {x: distance * spacing, y: 0, z: a * a * (mobile ? 9 : 25), rotation: -distance * 12, opacity: a > 3 ? 0 : 1};
+ return {x: distance * spacing, y: 0, z: a * a * (mobile ? 5 : 25), rotation: -distance * (mobile ? 9 : 12), opacity: a > 3 ? 0 : 1};
 }
 export function setupGallery(photos) {
  const carousel = document.querySelector('#carousel');
@@ -70,6 +70,7 @@ button.addEventListener('click', () => {
 
     if (
         !reducedMotion.matches &&
+        window.innerWidth >= 768 &&
         typeof card.animate === 'function'
     ) {
         // Copia visiva della fotografia in uscita.
@@ -399,7 +400,7 @@ let dragPosition = current;
 // Usa la stessa spaziatura del carosello 3D.
 function dragSpacing() {
   const width = window.innerWidth;
-  return width < 768 ? 155 : width >= 1600 ? 285 : 250;
+  return width < 768 ? 186 : width >= 1600 ? 285 : 250;
 }
 
 // Disegna le fotografie lungo un percorso continuo,
@@ -658,10 +659,46 @@ carousel.addEventListener('pointercancel', e => {
   const label=document.createElement('span');label.className='print-label';const category=document.createElement('span');category.textContent=p.category;const status=document.createElement('span');status.textContent='Apri ↗';label.append(category,status);button.append(img,label);button.addEventListener('click',()=>open(i));board.append(button);
  });
  const note=document.createElement('span');note.className='board-note';note.textContent='Linee, forme, dettagli.';note.setAttribute('aria-hidden','true');board.append(note);
- function showLarge(i){enlarged=wrap(i,photos.length);const p=photos[enlarged];const img=document.querySelector('#lightbox-img');img.src=imagePath(p);img.alt=photoName(p);document.querySelector('#lightbox-caption').textContent = photoName(p);}
- function open(i){showLarge(i);lightbox.showModal();}
- document.querySelector('#lightbox-prev').addEventListener('click',()=>showLarge(enlarged-1));document.querySelector('#lightbox-next').addEventListener('click',()=>showLarge(enlarged+1));
- lightbox.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();showLarge(enlarged+(e.key==='ArrowRight'?1:-1));}});
+ function showLarge(i) {
+  enlarged = wrap(i, photos.length);
+  const p = photos[enlarged];
+  const img = document.querySelector('#lightbox-img');
+  img.src = imagePath(p);
+  img.alt = photoName(p);
+  document.querySelector('#lightbox-caption').textContent = photoName(p);
+ }
+ let photoIsClosing = false;
+ function open(i) {
+  if (lightbox.open || photoIsClosing) return;
+  showLarge(i);
+  lightbox.showModal();
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+   if (lightbox.open && !photoIsClosing) lightbox.classList.add('is-visible');
+  }));
+ }
+ function closePhotoLightbox() {
+  if (!lightbox.open || photoIsClosing) return;
+  photoIsClosing = true;
+  lightbox.classList.remove('is-visible');
+  setTimeout(() => {
+   if (lightbox.open) lightbox.close();
+   photoIsClosing = false;
+  }, reducedMotion.matches ? 0 : 300);
+ }
+ lightbox.querySelector('[data-close]').addEventListener('click',closePhotoLightbox);
+ lightbox.addEventListener('cancel',e=>{e.preventDefault();closePhotoLightbox();});
+ lightbox.addEventListener('click',e=>{
+  if(e.target!==lightbox)return;
+  const r=lightbox.getBoundingClientRect();
+  if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closePhotoLightbox();
+ });
+ document.querySelector('#lightbox-prev').addEventListener('click',()=>showLarge(enlarged-1));
+ document.querySelector('#lightbox-next').addEventListener('click',()=>showLarge(enlarged+1));
+ lightbox.addEventListener('keydown',e=>{
+  if(e.key==='ArrowLeft'||e.key==='ArrowRight'){
+   e.preventDefault();showLarge(enlarged+(e.key==='ArrowRight'?1:-1));
+  }
+ });
  render();
  setupHeroSmoke();
  // The reference reveals the outside pair first, then the inside pair,
