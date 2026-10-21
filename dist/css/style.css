@@ -2038,3 +2038,349 @@ body {
     margin-top: 8px;
   }
 }
+
+
+/* ======================================================
+   TATTOOART — RIFINITURE EDITORIALI V2
+   Recensioni, footer, modali e menu, senza nuovi sfondi
+   ====================================================== */
+
+/* RECENSIONI: gerarchia e spaziatura del riferimento */
+.reviews.section {
+  position: relative;
+  background: transparent;
+  padding-top: clamp(72px, 7vw, 112px);
+  padding-bottom: clamp(75px, 7vw, 112px);
+  border-top: 1px solid rgba(236, 233, 226, .13);
+  border-bottom: 1px solid rgba(236, 233, 226, .13);
+}
+.reviews .section-label {
+  text-align: left;
+  margin-bottom: 24px;
+}
+.reviews h2 {
+  font: 400 clamp(51px, 5.1vw, 75px)/1.05 var(--serif);
+  letter-spacing: -.035em;
+  margin: 22px 0 52px;
+}
+.reviews .review-stage {
+  max-width: 1020px;
+  min-height: 176px;
+  margin: 0 auto 26px;
+  gap: 0;
+}
+.reviews .quote-mark { display: none; }
+.reviews .stars {
+  font-size: 16px;
+  letter-spacing: .085em;
+  margin: 0 0 20px;
+  line-height: 1;
+}
+.reviews #review-text {
+  font: italic 400 clamp(25px, 2.4vw, 35px)/1.27 var(--serif);
+  letter-spacing: -.016em;
+  margin: 0 auto 17px;
+  max-width: 920px;
+}
+.reviews #review-author {
+  font: 600 12px/1.5 var(--sans);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.reviews #review-source {
+  display: inline-block;
+  align-self: center;
+  color: var(--muted);
+  font-size: 10px;
+  margin-top: 6px;
+  border-bottom: 1px solid rgba(236,233,226,.26);
+  padding-bottom: 3px;
+}
+.reviews .review-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 21px;
+  margin: 26px 0 34px;
+}
+.reviews .review-controls .round {
+  width: 42px;
+  height: 42px;
+}
+.reviews #review-count {
+  font-size: 10px;
+  letter-spacing: .15em;
+  min-width: 62px;
+}
+.reviews > .text-link {
+  display: inline-block;
+  border-bottom: 1px solid rgba(236,233,226,.34);
+  padding-bottom: 4px;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+/* La classe changing continua ad animarsi con l'originale quote-in. */
+
+/* FOOTER: nessuna fascia rettangolare, sfondo unico del body */
+.site-footer.footer-minimal {
+  background: transparent !important;
+  max-width: 1540px;
+  padding: clamp(48px, 5vw, 80px) clamp(24px, 6vw, 100px) 32px;
+}
+.footer-minimal .footer-top {
+  border-top: 1px solid rgba(236,233,226,.15);
+  padding-top: 65px;
+  padding-bottom: 57px;
+  align-items: flex-start;
+}
+.footer-minimal .footer-identity strong {
+  font: 600 14px/1.35 var(--sans);
+  letter-spacing: .09em;
+}
+.footer-minimal .footer-identity p {
+  margin: 1px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.footer-minimal .footer-privacy {
+  font-size: 12px;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+}
+.footer-minimal .footer-wordmark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(16px, 3vw, 55px);
+  width: 100%;
+  margin: 0;
+  padding: clamp(55px, 5vw, 79px) 0 clamp(55px, 5vw, 79px);
+  border-top: 1px solid rgba(236,233,226,.15);
+  border-bottom: 1px solid rgba(236,233,226,.15);
+  font: 400 clamp(72px, 12vw, 187px)/.8 var(--serif);
+  letter-spacing: -.055em;
+  white-space: nowrap;
+}
+.footer-minimal .footer-wordmark span {
+  font-family: var(--sans);
+  font-weight: 300;
+  font-size: .49em;
+  color: #c6c4c0;
+  letter-spacing: 0;
+  margin-top: -.08em;
+}
+.footer-minimal .footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0;
+  padding: 29px 0 10px;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: .02em;
+}
+.footer-minimal .footer-bottom a { color: var(--ivory); }
+
+/* MODALI: la stessa dissolvenza già usata nei Flash Tattoos */
+#lightbox,
+#booking-dialog {
+  opacity: 0;
+  transform: translateY(15px) scale(.98);
+  transition:
+    opacity .3s ease,
+    transform .3s cubic-bezier(.22,.7,.2,1);
+}
+#lightbox.is-visible,
+#booking-dialog.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+#lightbox::backdrop,
+#booking-dialog::backdrop {
+  background: rgba(0,0,0,.78);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+#lightbox.is-visible::backdrop,
+#booking-dialog.is-visible::backdrop { opacity: 1; }
+
+/* PRENOTAZIONI: proporzioni, contrasto, contenuti del riferimento */
+#booking-dialog {
+  width: min(520px, calc(100vw - 32px));
+  max-width: none;
+  padding: 30px 32px 31px;
+  border: 1px solid rgba(236,233,226,.2);
+  background: #151517;
+  color: var(--ivory);
+  box-shadow: 0 24px 70px rgba(0,0,0,.5);
+}
+#booking-dialog .eyebrow {
+  font-size: 10px;
+  letter-spacing: .18em;
+}
+#booking-dialog h2 {
+  font: 400 clamp(39px, 4vw, 46px)/.98 var(--serif);
+  letter-spacing: -.025em;
+  margin: 17px 0 20px;
+}
+#booking-dialog > p:not(.dialog-note) {
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0;
+}
+#booking-dialog fieldset { margin: 25px 0 23px; }
+#booking-dialog legend {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .045em;
+  margin-bottom: 12px;
+}
+#booking-dialog .service-options { gap: 8px; }
+#booking-dialog .service-options span {
+  padding: 11px 7px;
+  border-color: rgba(236,233,226,.17);
+  font-size: 11px;
+}
+#booking-dialog .dialog-note {
+  margin: 17px 0 0;
+  text-align: center;
+  font-size: 10px;
+  color: var(--muted);
+}
+#booking-dialog .dialog-close { font-size: 27px; }
+
+/* SMARTPHONE */
+@media (max-width: 767px) {
+  .reviews.section {
+    padding-top: 66px;
+    padding-bottom: 70px;
+  }
+  .reviews h2 {
+    margin: 10px 0 35px;
+    font-size: clamp(47px, 11vw, 64px);
+  }
+  .reviews .review-stage { min-height: 200px; margin-bottom: 18px; }
+  .reviews #review-text { font-size: clamp(25px, 6.5vw, 32px); }
+
+  .site-footer.footer-minimal {
+    padding: 30px 22px 24px;
+  }
+  .footer-minimal .footer-top {
+    flex-direction: row;
+    gap: 16px;
+    padding-top: 32px;
+    padding-bottom: 34px;
+  }
+  .footer-minimal .footer-identity strong {
+    font-size: 11px;
+    letter-spacing: .065em;
+  }
+  .footer-minimal .footer-identity p { font-size: 10px; }
+  .footer-minimal .footer-privacy { font-size: 10px; }
+  .footer-minimal .footer-wordmark {
+    font-size: clamp(35px, 11.8vw, 80px);
+    letter-spacing: -.06em;
+    gap: 10px;
+    padding: 48px 0;
+  }
+  .footer-minimal .footer-wordmark span { font-size: .44em; }
+  .footer-minimal .footer-bottom { font-size: 9px; padding-top: 22px; }
+
+  #booking-dialog {
+    padding: 28px 21px 24px;
+  }
+  #booking-dialog h2 {
+    font-size: clamp(37px, 10vw, 47px);
+  }
+
+  /* Menu più raccolto con apertura e chiusura graduali */
+  .site-header #navigation {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 76px;
+    left: auto;
+    right: 16px;
+    width: min(302px, calc(100vw - 32px));
+    max-height: calc(100dvh - 94px);
+    overflow-y: auto;
+    padding: 19px 23px;
+    gap: 3px;
+    z-index: 30;
+    background: rgba(24,24,27,.97);
+    border: 1px solid rgba(236,233,226,.19);
+    box-shadow: 0 20px 55px rgba(0,0,0,.44);
+    backdrop-filter: blur(12px);
+    transform-origin: top right;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-9px) scale(.985);
+    transition:
+      opacity .28s ease,
+      transform .3s cubic-bezier(.22,.7,.2,1),
+      visibility 0s linear .3s;
+  }
+  .site-header #navigation.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+    transition-delay: 0s;
+  }
+  .site-header #navigation a {
+    display: block;
+    padding: 9px 0;
+    font: 400 24px/1.15 var(--serif);
+    text-transform: none;
+    letter-spacing: -.015em;
+    opacity: 0;
+    transform: translateY(9px);
+    transition:
+      opacity .22s ease,
+      transform .3s cubic-bezier(.22,.7,.2,1),
+      color .2s ease;
+    transition-delay: 0s;
+  }
+  .site-header #navigation.is-open a {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .site-header #navigation.is-open a:nth-child(1) { transition-delay: 95ms; }
+  .site-header #navigation.is-open a:nth-child(2) { transition-delay: 140ms; }
+  .site-header #navigation.is-open a:nth-child(3) { transition-delay: 185ms; }
+  .site-header #navigation.is-open a:nth-child(4) { transition-delay: 230ms; }
+  .site-header #navigation.is-open a:nth-child(5) { transition-delay: 275ms; }
+  .site-header #navigation.is-open a:nth-child(6) { transition-delay: 320ms; }
+
+  /* Carosello: più spazio tra le foto, meno lavoro grafico sul touch */
+  .carousel-card {
+    width: 166px;
+    height: 236px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  .carousel.is-dragging .carousel-card {
+    transition: none !important;
+  }
+}
+@media (max-width: 390px) {
+  .carousel-card { width: 154px; height: 220px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #lightbox,
+  #booking-dialog,
+  #lightbox::backdrop,
+  #booking-dialog::backdrop,
+  .site-header #navigation,
+  .site-header #navigation a {
+    transition: none !important;
+  }
+  #lightbox.is-visible,
+  #booking-dialog.is-visible {
+    transform: none;
+  }
+}
