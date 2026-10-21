@@ -21,7 +21,7 @@ artistMain.alt = 'Christian Giammarino, tatuatore di Tattooart Fiumicino';
 
 assignPhoto('#artist-detail', 'process-detail.webp');
 setupBooking();setupGallery(photos.filter(p=>p.hero!==false));
-document.querySelectorAll('dialog:not(#flash-lightbox)').forEach(dialog=>{dialog.querySelector('[data-close]').addEventListener('click',()=>dialog.close());dialog.addEventListener('click',e=>{const r=dialog.getBoundingClientRect();if(e.target===dialog&&(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom))dialog.close();});});
+document.querySelectorAll('dialog:not(#flash-lightbox):not(#lightbox):not(#booking-dialog)').forEach(dialog=>{dialog.querySelector('[data-close]').addEventListener('click',()=>dialog.close());dialog.addEventListener('click',e=>{const r=dialog.getBoundingClientRect();if(e.target===dialog&&(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom))dialog.close();});});
 let reviewIndex=0;
 function renderReview(){const r=reviews[reviewIndex];$('#review-text').textContent=`“${r.text}…”`;$('#review-author').textContent=r.author;$('#review-stars').textContent='★'.repeat(r.rating);$('#review-stars').setAttribute('aria-label',`${r.rating} su 5 stelle`);$('#review-source').href=r.source;$('#review-count').textContent=`${String(reviewIndex+1).padStart(2,'0')} / ${String(reviews.length).padStart(2,'0')}`;const stage=$('.review-stage');stage.classList.remove('changing');requestAnimationFrame(()=>stage.classList.add('changing'));}
 $('#review-prev').addEventListener('click',()=>{reviewIndex=wrap(reviewIndex-1,reviews.length);renderReview();});$('#review-next').addEventListener('click',()=>{reviewIndex=wrap(reviewIndex+1,reviews.length);renderReview();});renderReview();
