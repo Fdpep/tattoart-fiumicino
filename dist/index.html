@@ -7,6 +7,103 @@
  <meta name="theme-color" content="#0C0C0D"><meta property="og:title" content="Tattooart — Christian Giammarino"><meta property="og:description" content="Tatuaggi e piercing a Fiumicino. Conosci Christian e parla con lui del tuo prossimo tatuaggio."><meta property="og:type" content="website"><meta property="og:locale" content="it_IT">
  <meta property="og:url" content="https://fdpep.github.io/tattooart-fiumicino/">
  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="css/style.css?v=fix-fumo-1">
+ <style>
+ /* HERO TITOLO — COMPOSIZIONE EDITORIALE
+    Regole isolate al solo titolo: fumo e carosello invariati. */
+ #home .hero-top {
+   width: min(900px, calc(100% - 56px));
+   max-width: none;
+   margin: 0 auto 23px;
+   padding: 0 0 13px;
+   border-bottom: 1px solid rgba(236,233,226,.09);
+   align-items: center;
+ }
+ #home .hero-top .eyebrow {
+   font-size: 10px;
+   letter-spacing: .18em;
+   color: #bdbab6;
+ }
+ #hero-title {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   gap: .085em;
+   width: max-content;
+   max-width: 100%;
+   margin: 0 auto;
+   font-size: clamp(58px, 7.45vw, 102px);
+   line-height: .98;
+   letter-spacing: -.049em;
+   white-space: nowrap;
+ }
+ #hero-title > span {
+   display: inline;
+   margin: 0;
+   font-style: italic;
+   font-weight: 400;
+ }
+ #hero-title > i {
+   position: static;
+   display: inline-flex;
+   flex: 0 0 auto;
+   align-items: center;
+   justify-content: center;
+   width: .42em;
+   height: .42em;
+   margin: .08em 0 0 .035em;
+   font-size: inherit;
+   font-style: normal;
+   line-height: 1;
+   color: #b8cbd3;
+ }
+ #hero-title > i .asterisk-mark {
+   width: 100%;
+   height: 100%;
+   stroke-width: 5;
+   vertical-align: initial;
+ }
+ #home .hero-subtitle {
+   margin: 17px 20px 0;
+   font-size: clamp(13px, 1.2vw, 17px);
+   letter-spacing: .01em;
+ }
+ @media (max-width: 767px) {
+   #home .hero-top {
+     width: calc(100% - 40px);
+     margin-bottom: 34px;
+     padding-bottom: 10px;
+   }
+   #home .hero-top .eyebrow {
+     font-size: 8px;
+     letter-spacing: .11em;
+   }
+   #hero-title {
+     display: block;
+     width: auto;
+     max-width: 100%;
+     padding: 0 12px;
+     font-size: clamp(50px, 12.2vw, 94px);
+     line-height: .89;
+     white-space: normal;
+   }
+   #hero-title > span {
+     display: block;
+     margin: 0;
+   }
+   #hero-title > i {
+     position: absolute;
+     top: -.1em;
+     right: 9%;
+     width: .38em;
+     height: .38em;
+     margin: 0;
+   }
+   #home .hero-subtitle {
+     margin-top: 22px;
+     font-size: 11px;
+   }
+ }
+ </style>
  <link rel="preload" href="assets/fonts/CormorantGaramond.ttf" as="font" type="font/ttf" crossorigin>
  <script type="module" src="js/app.js?v=fix-fumo-1"></script>
 </head>
