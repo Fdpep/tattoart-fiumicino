@@ -1,6 +1,6 @@
 import {studio,navigation,reviews} from './data.js';
-import {setupGallery,wrap} from './gallery.js';
-import {setupBooking} from './booking.js';
+import {setupGallery,wrap} from './gallery.js?v=2';
+import {setupBooking} from './booking.js?v=2';
 import {photos} from './photos.js';
 const $=selector=>document.querySelector(selector);
 document.querySelectorAll('[data-link]').forEach(a=>{a.href=studio[a.dataset.link];});
