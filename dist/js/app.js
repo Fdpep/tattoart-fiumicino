@@ -1,5 +1,5 @@
 import {studio,navigation,reviews} from './data.js';
-import {setupGallery,wrap} from './gallery.js?v=3';
+import {setupGallery,wrap} from './gallery.js?v=5';
 import {setupBooking} from './booking.js?v=2';
 import {photos} from './photos.js';
 const $=selector=>document.querySelector(selector);
