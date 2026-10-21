@@ -5,26 +5,22 @@ export function relativePosition(index, current, length) {
  if (d > length / 2) d -= length;
  return d;
 }
+function orbitRadius(viewport) {
+ return viewport < 768
+  ? Math.min(310, Math.max(250, viewport * .8))
+  : Math.min(740, Math.max(420, viewport * .5));
+}
 export function cardTransform(distance, viewport) {
  const mobile = viewport < 768;
- const spacing = mobile ? 186 : viewport >= 1600 ? 250 : 220;
- const a = Math.abs(distance);
-
- // Coverflow 3D solo smartphone: il centro resta in primo piano.
- // La scala, la profondità e l'inclinazione cambiano continuamente
- // durante lo swipe; desktop mantiene il suo transform originale.
- if (mobile) {
-  const depth = Math.min(a, 1.5);
-  return {
-   x: distance * spacing,
-   y: Math.min(a, 1.5) * 9,
-   z: -75 * depth,
-   rotation: -Math.sign(distance) * Math.min(a, 1.5) * 16,
-   scale: 1 - .15 * Math.min(a, 1),
-   opacity: a > 3 ? 0 : 1
-  };
- }
- return {x: distance * spacing, y: 0, z: a * a * 25, rotation: -distance * 12, opacity: a > 3 ? 0 : 1};
+ const angle = distance * (mobile ? .63 : .39);
+ // Ellisse 3D reale: la card centrale esce verso l'utente;
+ // quelle ai lati ruotano e rientrano in profondità.
+ return {
+  x: orbitRadius(viewport) * Math.sin(angle),
+  y: Math.min(Math.abs(distance), 3) * (mobile ? 3 : 7),
+  z: (mobile ? 40 : 75) - (mobile ? 220 : 525) * (1 - Math.cos(angle)),
+  rotation: -angle * (mobile ? .8 : .9) * 180 / Math.PI
+ };
 }
 export function setupGallery(photos) {
  const carousel = document.querySelector('#carousel');
@@ -32,10 +28,11 @@ export function setupGallery(photos) {
  const lightbox = document.querySelector('#lightbox');
  let current = 0, enlarged = 0, pointerStart = null, dragged = false;
  let navigatingToCard = false;
+ let lastDragEnd = -1000;
  const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
  let entrance=[];
  function finishEntrance(){entrance.forEach(a=>a.cancel());entrance=[];document.querySelector('.hero').classList.remove('hero-entering');}
- const transform=t=>`translate(-50%, 0) translate3d(${t.x}px, ${t.y}px, ${t.z}px) rotateY(${t.rotation}deg)${t.scale === undefined ? '' : ` scale(${t.scale})`}`;
+ const transform=t=>`translate(-50%, 0) translate3d(${t.x}px, ${t.y}px, ${t.z}px) rotateY(${t.rotation}deg)`;
  const photoName = p => p.description_it;
  const imagePath = p => p.path || `assets/photos/${p.filename}`;
  const cards = photos.map((p, i) => {
@@ -46,8 +43,9 @@ export function setupGallery(photos) {
   img.decoding = 'async'; if (i === 0) img.fetchPriority = 'high';
   const label = document.createElement('span'); label.className = 'photo-index'; label.textContent = `${String(i+1).padStart(2,'0')} / ${String(photos.length).padStart(2,'0')}`;
   button.append(img,label); carousel.append(button);
-button.addEventListener('click', () => {
-  if (dragged || navigatingToCard || arrowFrame) return;
+button.addEventListener('click', event => {
+  if (dragged || navigatingToCard || arrowFrame ||
+      (event.detail !== 0 && performance.now() - lastDragEnd < 320)) return;
 
   if (i === current) {
     open(i);
@@ -57,113 +55,35 @@ button.addEventListener('click', () => {
 });
   return button;
  });
- function render(dragOffset=0) {
-  cards.forEach((card,i) => {
-   const d = relativePosition(i,current,photos.length)+dragOffset; const t = cardTransform(d,window.innerWidth);
-   const old=Number(card.dataset.distance);
-    if (
-    !dragOffset &&
-    Number.isFinite(old) &&
-    Math.abs(old - d) > photos.length / 2
-    ) {
-    // La fotografia esce da un lato e rientra dall'altro.
-
-    const viewport = window.innerWidth;
-
-    const previous = cardTransform(old, viewport);
-    const outgoing = cardTransform(
-        old + Math.sign(old),
-        viewport
-    );
-    const incoming = cardTransform(
-        d + Math.sign(d),
-        viewport
-    );
-
-    card.style.transition = 'none';
-    card.style.transform = transform(t);
-
-    if (
-        !reducedMotion.matches &&
-        window.innerWidth >= 768 &&
-        typeof card.animate === 'function'
-    ) {
-        // Copia visiva della fotografia in uscita.
-        const ghost = card.cloneNode(true);
-
-        ghost.setAttribute('aria-hidden', 'true');
-        ghost.tabIndex = -1;
-        ghost.style.pointerEvents = 'none';
-        ghost.style.transition = 'none';
-        ghost.style.transform = transform(previous);
-        ghost.style.opacity = '1';
-
-        carousel.append(ghost);
-
-        const options = {
-        duration: 650,
-        easing: 'cubic-bezier(.22,.7,.2,1)',
-        fill: 'both'
-        };
-
-        // Animazione di uscita.
-        const exit = ghost.animate(
-        [
-            {
-            transform: transform(previous),
-            opacity: 1
-            },
-            {
-            transform: transform(outgoing),
-            opacity: 0
-            }
-        ],
-        options
-        );
-
-        // Animazione di ingresso dal lato opposto.
-        const entry = card.animate(
-        [
-            {
-            transform: transform(incoming),
-            opacity: 0
-            },
-            {
-            transform: transform(t),
-            opacity: 1
-            }
-        ],
-        options
-        );
-
-        exit.onfinish = () => {
-        exit.cancel();
-        ghost.remove();
-        };
-
-        entry.onfinish = () => {
-        entry.cancel();
-        card.style.transition = '';
-        };
-
-    } else {
-        requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            card.style.transition = '';
-        });
-        });
-    }
-
-    } else {
-    card.style.transform = transform(t);
-    }
-   if(!dragOffset)card.dataset.distance=String(d);
-   card.style.zIndex = String(10-Math.round(Math.abs(d))); card.style.opacity = t.opacity;
-   card.tabIndex = i === current ? 0 : -1;
-   card.setAttribute('aria-hidden',String(!t.opacity)); card.style.pointerEvents = t.opacity ? 'auto' : 'none';
-  });
-  document.querySelector('#hero-count').textContent = `${String(current+1).padStart(2,'0')} / ${String(photos.length).padStart(2,'0')}`;
+ // A fine orbita le card spariscono prima del riciclo sul lato opposto.
+ function orbitOpacity(distance) {
+  const edge = photos.length / 2;
+  const start = Math.min(edge - .55, window.innerWidth < 768 ? 1.5 : 2.35);
+  const end = Math.max(start + .05, edge - .16);
+  const t = Math.max(0, Math.min(1, (end - Math.abs(distance)) / (end - start)));
+  return t * t * (3 - 2 * t);
  }
+
+ function paintOrbit(position, settled = false) {
+  const viewport = window.innerWidth;
+  const active = wrap(Math.round(position), photos.length);
+  cards.forEach((card, i) => {
+   const d = relativePosition(i, position, photos.length);
+   const opacity = orbitOpacity(d);
+   card.style.transform = transform(cardTransform(d, viewport));
+   card.style.opacity = String(opacity);
+   card.style.zIndex = String(100 - Math.round(Math.abs(d) * 10));
+   card.style.pointerEvents = opacity > .12 ? 'auto' : 'none';
+   if (settled) {
+    card.dataset.distance = String(d);
+    card.tabIndex = i === active ? 0 : -1;
+    card.setAttribute('aria-hidden', String(opacity < .12));
+   }
+  });
+  document.querySelector('#hero-count').textContent =
+   `${String(active + 1).padStart(2, '0')} / ${String(photos.length).padStart(2, '0')}`;
+ }
+ function render() { paintOrbit(current, true); }
 // Scorre fino alla fotografia selezionata,
 // passando attraverso tutte le posizioni intermedie.
 
@@ -242,40 +162,7 @@ function goToCard(target) {
     const visualPosition =
       from + distance * eased;
 
-    cards.forEach((card, i) => {
-      const d = relativePosition(
-        i,
-        visualPosition,
-        photos.length
-      );
-
-      const shape = cardTransform(
-        d,
-        window.innerWidth
-      );
-
-      // Dissolvenza ai margini del carosello:
-      // evita che le card saltino visibilmente
-      // da un'estremità all'altra.
-      const edge = photos.length / 2;
-      const fadeStart = Math.min(3, edge - 0.8);
-      const fadeEnd = Math.min(3.8, edge - 0.15);
-
-      const opacity = Math.max(
-        0,
-        Math.min(
-          1,
-          (fadeEnd - Math.abs(d)) /
-          (fadeEnd - fadeStart)
-        )
-      );
-
-      card.style.transform = transform(shape);
-      card.style.opacity = String(opacity);
-      card.style.zIndex = String(
-        10 - Math.round(Math.abs(d))
-      );
-    });
+    renderDrag(visualPosition);
 
     if (progress < 1) {
       requestAnimationFrame(animateFrame);
@@ -411,63 +298,17 @@ function step(n) {
    ========================================= */
 
 let dragPosition = current;
+let dragFrame = 0;
 
 // Usa la stessa spaziatura del carosello 3D.
 function dragSpacing() {
   const width = window.innerWidth;
-  return width < 768 ? 186 : width >= 1600 ? 285 : 250;
+  return orbitRadius(width) * Math.sin(width < 768 ? .63 : .39);
 }
 
 // Disegna le fotografie lungo un percorso continuo,
 // senza limiti di inizio o fine.
-function renderDrag(position) {
-  cards.forEach((card, i) => {
-    const d = relativePosition(
-      i,
-      position,
-      photos.length
-    );
-
-    const t = cardTransform(d, window.innerWidth);  
-
-    // Le fotografie scompaiono dolcemente ai margini
-    // e rientrano dal lato opposto senza salti visibili.
-    const edge = photos.length / 2;
-
-    const fadeStart = Math.min(
-    3.05,
-    edge - 0.45
-    );
-
-    const fadeEnd = edge - 0.08;
-
-    const opacity = Math.max(
-    0,
-    Math.min(
-        1,
-        (fadeEnd - Math.abs(d)) /
-        (fadeEnd - fadeStart)
-    )
-    );
-
-    card.style.transform = transform(t);
-    card.style.opacity = String(opacity);
-    card.style.zIndex = String(
-      10 - Math.round(Math.abs(d))
-    );
-    card.style.pointerEvents =
-      opacity > 0 ? 'auto' : 'none';
-  });
-
-  const activeIndex = wrap(
-    Math.round(position),
-    photos.length
-  );
-
-  document.querySelector('#hero-count').textContent =
-    `${String(activeIndex + 1).padStart(2, '0')} / ` +
-    `${String(photos.length).padStart(2, '0')}`;
-}
+function renderDrag(position) { paintOrbit(position, false); }
 
 // Quando lasci il mouse o il dito,
 // il carosello si assesta sulla foto più vicina.
@@ -606,10 +447,14 @@ carousel.addEventListener('pointermove', e => {
   // NESSUN BLOCCO a 0.9 fotografie.
   // La posizione può aumentare o diminuire
   // indefinitamente durante il trascinamento.
-  dragPosition =
-    current - dx / dragSpacing();
-
-  renderDrag(dragPosition);
+  dragPosition = current - dx / dragSpacing();
+  // Aggiorna al massimo una volta per frame, anche con touch a 120 Hz.
+  if (!dragFrame) {
+   dragFrame = requestAnimationFrame(() => {
+    dragFrame = 0;
+    renderDrag(dragPosition);
+   });
+  }
 });
 
 // RILASCIO DEL MOUSE O DEL DITO
@@ -627,6 +472,11 @@ carousel.addEventListener('pointerup', e => {
   }
 
   if (dragged) {
+    if (dragFrame) cancelAnimationFrame(dragFrame);
+    dragFrame = 0;
+    renderDrag(dragPosition);
+    lastDragEnd = performance.now();
+
     // Piccola inerzia naturale sugli swipe veloci.
     const recentlyMoved =
       performance.now() - gesture.lastTime < 90;
@@ -657,6 +507,10 @@ carousel.addEventListener('pointercancel', e => {
   pointerStart = null;
 
   if (dragged) {
+    if (dragFrame) cancelAnimationFrame(dragFrame);
+    dragFrame = 0;
+    renderDrag(dragPosition);
+    lastDragEnd = performance.now();
     settleDrag(Math.round(dragPosition));
   } else {
     carousel.classList.remove('is-dragging');
@@ -723,7 +577,7 @@ carousel.addEventListener('pointercancel', e => {
   cards.forEach((card,i)=>{
    const d=relativePosition(i,current,photos.length),a=Math.abs(d),t=cardTransform(d,window.innerWidth);
    const start={...t,x:t.x+(d===0?0:Math.sign(d)*(100+(3-a)*45)),z:t.z-260,rotation:t.rotation+(d===0?0:Math.sign(d)*45)};
-   entrance.push(card.animate([{transform:transform(start),opacity:0},{transform:transform(t),opacity:1}],{duration:1050,delay:(3-a)*360,easing:'cubic-bezier(.18,.72,.2,1)',fill:'backwards'}));
+   entrance.push(card.animate([{transform:transform(start),opacity:0},{transform:transform(t),opacity:orbitOpacity(d)}],{duration:1050,delay:(3-a)*360,easing:'cubic-bezier(.18,.72,.2,1)',fill:'backwards'}));
   });
   reducedMotion.addEventListener('change',()=>{if(reducedMotion.matches)finishEntrance();});
  }
