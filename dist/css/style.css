@@ -2434,3 +2434,72 @@ body {
     transition: none !important;
   }
 }
+
+
+/* =========================================
+   HERO — ORBITA ELLITTICA 3D INFINITY
+   Solo immagini e scena: fumo originale invariato.
+   ========================================= */
+
+/* Colori fedeli alle foto, senza filtri di desaturazione. */
+.hero .carousel-card img,
+.hero .carousel-card:hover img {
+  filter: none;
+}
+
+@media (min-width: 768px) {
+  .hero .gallery-scene {
+    height: 425px;
+    margin-top: 24px;
+  }
+  .hero .carousel {
+    perspective: 1100px;
+  }
+  .hero .carousel-card {
+    width: clamp(210px, 18vw, 270px);
+    height: clamp(300px, 25vw, 380px);
+    top: 16px;
+    border-radius: 4px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .hero .gallery-scene { height: 354px; }
+  .hero .carousel-card {
+    width: 215px;
+    height: 304px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .hero .gallery-scene { height: 455px; }
+  .hero .carousel-card {
+    width: 280px;
+    height: 397px;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Stessa rotazione orbitale, dimensioni compatte e GPU leggera. */
+  .hero .gallery-scene {
+    height: 320px;
+    margin-top: 25px;
+  }
+  .hero .carousel { perspective: 900px; }
+  .hero .carousel-card {
+    width: 174px;
+    height: 246px;
+    top: 18px;
+    border-radius: 9px;
+  }
+  .hero .carousel.is-dragging .carousel-card {
+    transition: none !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .hero .carousel-card {
+    width: 164px;
+    height: 234px;
+  }
+}
