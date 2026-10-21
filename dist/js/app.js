@@ -169,6 +169,173 @@ nextBtn.addEventListener('click', () => {
   buildDots();
   updateFlashSlider();
 
+  /* =========================================
+     FLASH — SWIPE MOBILE RAF
+     Drag libero col dito, snap morbido e nessun click involontario.
+     Il movimento verticale della pagina resta nativo.
+     ========================================= */
+  const flashViewport = flashSlider.querySelector('.flash-stencils-viewport');
+  const flashMobile = window.matchMedia('(max-width: 767px)');
+  let flashGesture = null;
+  let flashAnimationFrame = 0;
+  let ignoreFlashClickUntil = 0;
+
+  const findFlashTouch = (touches, id) =>
+    Array.from(touches).find(touch => touch.identifier === id);
+
+  function endFlashGesture(event, cancelled = false) {
+    const gesture = flashGesture;
+    if (!gesture) return;
+    const finger = findFlashTouch(event.changedTouches, gesture.id);
+    if (!finger) return;
+
+    flashGesture = null;
+    if (flashAnimationFrame) cancelAnimationFrame(flashAnimationFrame);
+    flashAnimationFrame = 0;
+    if (!gesture.dragging) return;
+
+    const max = getMaxIndex();
+    const dx = finger.clientX - gesture.startX;
+    const startIndex = Math.max(0, Math.min(max,
+      Math.round(-gesture.base / gesture.distance)));
+
+    let target = startIndex;
+
+    if (!cancelled) {
+      // Una sola proiezione d'inerzia, limitata a circa una card.
+      const recentlyMoved = performance.now() - gesture.lastTime < 110;
+      const inertia = recentlyMoved
+        ? Math.max(-gesture.distance * .85,
+            Math.min(gesture.distance * .85, gesture.velocity * 110))
+        : 0;
+      target = Math.round(-(gesture.base + dx + inertia) / gesture.distance);
+      target = Math.max(0, Math.min(max, target));
+
+      // Swipe deliberato corto: avanza di uno stencil anche
+      // quando non supera la metà della distanza fra le card.
+      if (target === startIndex && Math.abs(dx) >= 34) {
+        target = Math.max(0, Math.min(max, startIndex + (dx < 0 ? 1 : -1)));
+      }
+    }
+
+    index = target;
+
+    // Fissa il punto di rilascio e riattiva la transizione una
+    // sola volta, evitando salti e layout ripetuti durante lo swipe.
+    track.style.transform = `translate3d(${gesture.offset}px,0,0)`;
+    void track.offsetWidth;
+    track.classList.remove('is-touch-dragging');
+    updateFlashSlider();
+
+    // Lo swipe non deve aprire accidentalmente la foto ingrandita.
+    ignoreFlashClickUntil = performance.now() + 350;
+  }
+
+  flashViewport.addEventListener('touchstart', event => {
+    if (!flashMobile.matches || event.touches.length !== 1 || flashGesture) return;
+    const finger = event.touches[0];
+    flashGesture = {
+      id: finger.identifier,
+      startX: finger.clientX,
+      startY: finger.clientY,
+      lastX: finger.clientX,
+      lastTime: performance.now(),
+      velocity: 0,
+      dragging: false,
+      distance: 0,
+      base: 0,
+      offset: 0
+    };
+  }, { passive: true });
+
+  flashViewport.addEventListener('touchmove', event => {
+    const gesture = flashGesture;
+    if (!gesture) return;
+    const finger = findFlashTouch(event.touches, gesture.id);
+    if (!finger) return;
+
+    const dx = finger.clientX - gesture.startX;
+    const dy = finger.clientY - gesture.startY;
+
+    if (!gesture.dragging) {
+      if (Math.max(Math.abs(dx), Math.abs(dy)) < 8) return;
+      if (Math.abs(dy) > Math.abs(dx)) {
+        flashGesture = null; // scroll verticale normale
+        return;
+      }
+
+      const step = items.length > 1
+        ? items[1].offsetLeft - items[0].offsetLeft
+        : 0;
+      if (!step) {
+        flashGesture = null;
+        return;
+      }
+
+      // Se il dito arriva mentre è ancora in corso uno snap,
+      // riparti dalla posizione visiva, senza salti.
+      const matrix = getComputedStyle(track).transform;
+      let base = -index * step;
+      if (matrix && matrix !== 'none') {
+        const match = matrix.match(/^matrix(?:3d)?\\((.+)\\)$/);
+        if (match) {
+          const values = match[1].split(',').map(Number);
+          const position = values.length === 16 ? values[12] : values[4];
+          if (Number.isFinite(position)) base = position;
+        }
+      }
+
+      gesture.base = base;
+      gesture.offset = base;
+      gesture.distance = step;
+      gesture.dragging = true;
+      track.classList.add('is-touch-dragging');
+      track.style.transform = `translate3d(${base}px,0,0)`;
+    }
+
+    if (event.cancelable) event.preventDefault();
+
+    const now = performance.now();
+    const elapsed = now - gesture.lastTime;
+    if (elapsed > 0) {
+      const instantaneous = (finger.clientX - gesture.lastX) / elapsed;
+      gesture.velocity = gesture.velocity * .4 + instantaneous * .6;
+    }
+    gesture.lastX = finger.clientX;
+    gesture.lastTime = now;
+
+    const end = -getMaxIndex() * gesture.distance;
+    let offset = gesture.base + dx;
+
+    // Piccola resistenza elastica solo oltre la prima/ultima card.
+    if (offset > 0) offset = Math.min(22, offset * .18);
+    if (offset < end) offset = Math.max(end - 22, end + (offset - end) * .18);
+
+    gesture.offset = offset;
+
+    // Al massimo una scrittura CSS per frame, anche con touch a 120 Hz.
+    if (!flashAnimationFrame) {
+      flashAnimationFrame = requestAnimationFrame(() => {
+        flashAnimationFrame = 0;
+        if (flashGesture?.dragging) {
+          track.style.transform =
+            `translate3d(${flashGesture.offset}px,0,0)`;
+        }
+      });
+    }
+  }, { passive: false });
+
+  flashViewport.addEventListener('touchend', event => endFlashGesture(event));
+  flashViewport.addEventListener('touchcancel', event =>
+    endFlashGesture(event, true));
+
+  flashViewport.addEventListener('click', event => {
+    if (event.detail === 0 || performance.now() >= ignoreFlashClickUntil) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    ignoreFlashClickUntil = 0;
+  }, true);
+
 
 /* =========================================
    FLASH TATTOOS — MODALE
