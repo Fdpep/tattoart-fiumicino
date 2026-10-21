@@ -2384,3 +2384,29 @@ body {
     transform: none;
   }
 }
+
+
+/* =========================================
+   COVERFLOW MOBILE E CTA WHATSAPP CENTRATA
+   ========================================= */
+
+/* La scritta e la freccia WhatsApp formano un unico gruppo centrato. */
+#booking-dialog #booking-whatsapp {
+  display: flex;
+  width: 100%;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+}
+
+/* Più prospettiva solo sotto 768px, senza ombre o filtri pesanti. */
+@media (max-width: 767px) {
+  .hero .carousel {
+    perspective: 790px;
+  }
+}
