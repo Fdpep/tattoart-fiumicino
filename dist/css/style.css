@@ -2410,3 +2410,27 @@ body {
     perspective: 790px;
   }
 }
+
+
+/* =========================================
+   FLASH — SWIPE TOUCH OTTIMIZZATO MOBILE
+   ========================================= */
+@media (max-width: 767px) {
+  .flash-stencils-viewport,
+  .flash-stencil-item {
+    /* Il browser gestisce lo scroll verticale,
+       il JavaScript solo il gesto orizzontale. */
+    touch-action: pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .flash-stencil-item img {
+    -webkit-user-drag: none;
+  }
+
+  /* Nessuna transizione mentre lo stencil segue il dito. */
+  .flash-stencils-track.is-touch-dragging {
+    transition: none !important;
+  }
+}
