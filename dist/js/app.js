@@ -277,9 +277,9 @@ nextBtn.addEventListener('click', () => {
       const matrix = getComputedStyle(track).transform;
       let base = -index * step;
       if (matrix && matrix !== 'none') {
-        const match = matrix.match(/^matrix(?:3d)?\\((.+)\\)$/);
-        if (match) {
-          const values = match[1].split(',').map(Number);
+        const start = matrix.indexOf('(');
+        if (start >= 0 && matrix.endsWith(')')) {
+          const values = matrix.slice(start + 1, -1).split(',').map(Number);
           const position = values.length === 16 ? values[12] : values[4];
           if (Number.isFinite(position)) base = position;
         }
