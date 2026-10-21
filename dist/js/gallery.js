@@ -1,4 +1,4 @@
-import {setupHeroSmoke} from './hero-smoke.js';
+import {setupHeroSmoke} from './hero-smoke.js?v=fix-fumo-1';
 export function wrap(index, length) { return ((index % length) + length) % length; }
 export function relativePosition(index, current, length) {
  let d = wrap(index - current, length);
