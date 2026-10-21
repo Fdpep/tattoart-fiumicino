@@ -9,7 +9,22 @@ export function cardTransform(distance, viewport) {
  const mobile = viewport < 768;
  const spacing = mobile ? 186 : viewport >= 1600 ? 250 : 220;
  const a = Math.abs(distance);
- return {x: distance * spacing, y: 0, z: a * a * (mobile ? 5 : 25), rotation: -distance * (mobile ? 9 : 12), opacity: a > 3 ? 0 : 1};
+
+ // Coverflow 3D solo smartphone: il centro resta in primo piano.
+ // La scala, la profondità e l'inclinazione cambiano continuamente
+ // durante lo swipe; desktop mantiene il suo transform originale.
+ if (mobile) {
+  const depth = Math.min(a, 1.5);
+  return {
+   x: distance * spacing,
+   y: Math.min(a, 1.5) * 9,
+   z: -75 * depth,
+   rotation: -Math.sign(distance) * Math.min(a, 1.5) * 16,
+   scale: 1 - .15 * Math.min(a, 1),
+   opacity: a > 3 ? 0 : 1
+  };
+ }
+ return {x: distance * spacing, y: 0, z: a * a * 25, rotation: -distance * 12, opacity: a > 3 ? 0 : 1};
 }
 export function setupGallery(photos) {
  const carousel = document.querySelector('#carousel');
@@ -20,7 +35,7 @@ export function setupGallery(photos) {
  const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
  let entrance=[];
  function finishEntrance(){entrance.forEach(a=>a.cancel());entrance=[];document.querySelector('.hero').classList.remove('hero-entering');}
- const transform=t=>`translate(-50%, 0) translate3d(${t.x}px, ${t.y}px, ${t.z}px) rotateY(${t.rotation}deg)`;
+ const transform=t=>`translate(-50%, 0) translate3d(${t.x}px, ${t.y}px, ${t.z}px) rotateY(${t.rotation}deg)${t.scale === undefined ? '' : ` scale(${t.scale})`}`;
  const photoName = p => p.description_it;
  const imagePath = p => p.path || `assets/photos/${p.filename}`;
  const cards = photos.map((p, i) => {
